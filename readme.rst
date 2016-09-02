@@ -19,14 +19,14 @@ Details
 =======
 
 - Monitors ``src/`` recursively.
-- All proceeding arguments are forwarded to cargo.
 - Can run from the projects root or any subdirectory.
-- Resets the terminal on each execution,
-  to keep messages isolated and reduce scrolling.
+- All proceeding arguments are forwarded to cargo.
+- If no arguments are provided, then cargo will run ``build`` and ``test``.
 - For more advanced usage,
   multiple commands can be passed using a quoted argument newlines,
   *(blank lines are ignored)*.
-- If no arguments are provided, then cargo will run ``build`` and ``test``.
+- Resets the terminal on each execution,
+  to keep messages isolated and reduce scrolling.
 - Errors raise an alert in the terminal on failure.
 
 
