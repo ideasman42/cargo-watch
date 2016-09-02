@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Utility to run cargo on source file changes
+# Arguments are forwarded to the cargo.
+
+if [ ! $# -eq 0 ]; then
+	CARGO_ARGS=${*:1}
+else
+	echo "No arguments supplied for cargo!"
+	exit 1
+fi
+
+# Allow running from a subdirectory
+function find_cargo_root() {
+	PARENT=""
+	GRANDPARENT="../"
+	unset CARGO_ROOT
+	while [ ! -e "$GRANDPARENT/Cargo.toml" ] && [ "$GRANDPARENT" != "/" ] ; do
+		PARENT=$GRANDPARENT
+		GRANDPARENT="$(cd $PARENT/..; pwd)"
+		# echo $GRANDPARENT
+	done
+	if [ ! -z "$GRANDPARENT" ] && [ "$GRANDPARENT" != "/" ] ; then
+		CARGO_ROOT=$GRANDPARENT
+	fi
+	unset PARENT GRANDPARENT
+}
+
+find_cargo_root
+if [ -n "$CARGO_ROOT" ]; then
+	cd "$CARGO_ROOT"
+fi
+unset $CARGO_ROOT
+
+if [ ! -d "src" ]; then
+	echo "Source directory: ./src doesn't exist"
+	exit 1
+fi
+
+
+echo "Watching \"$PWD/src\", Hit Ctrl-C to stop."
+
+# Generally useful
+export RUST_BACKTRACE=1
+
+# Allow multi-line input
+
+# Monitor source, ignoring hidden files (autosave, vim swap etc)
+while inotifywait --quiet --recursive src/ --exclude '/\..+' || true; do
+	# Reset terminal output.
+	tput reset
+
+	# Run cargo test and show any stdout
+
+	IFS=$'\n'
+	for ARG in $CARGO_ARGS ; do
+		# Avoid blank lines
+		if [ ! -z $ARG ]; then
+			MSG="Running from \"$PWD\": cargo $ARG"
+			LEN=${#MSG}
+			eval "printf "%0.s-" {1..$LEN}"
+			echo ""
+			echo $MSG
+			eval cargo $ARG
+		fi
+	done
+	echo ""
+	echo "*** Done! ***"
+
+	# Set terminal title, alert on failure
+	if [ ! $? -eq 0 ]; then
+		# beep, on some systems makes terminal alert! (handy)
+		echo -e "\a"
+	fi
+done
+
