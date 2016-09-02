@@ -51,7 +51,7 @@ Run multiple commands, using quoted newlines:
 .. code-block:: bash
 
    cargo-watch "
-   clear
+   clean
    build
    test
    run
