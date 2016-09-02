@@ -13,6 +13,7 @@ Simple shell script to watch a Rust project on Unix like systems.
 - For more advanced usage,
   multiple commands can be passed using a quoted argument newlines,
   *(blank lines are ignored)*.
+- If no arguments are provided, then cargo will run ``build`` and ``test``.
 
 
 Examples

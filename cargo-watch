@@ -6,8 +6,8 @@
 if [ ! $# -eq 0 ]; then
 	CARGO_ARGS=${*:1}
 else
-	echo "No arguments supplied for cargo!"
-	exit 1
+	CARGO_ARGS=$'build\ntest'
+	echo "No arguments supplied, running build & test."
 fi
 
 # Allow running from a subdirectory
