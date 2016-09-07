@@ -26,7 +26,8 @@ function find_cargo_root() {
 	if [ ! -z "$GRANDPARENT" ] && [ "$GRANDPARENT" != "/" ] ; then
 		CARGO_ROOT=$GRANDPARENT
 	fi
-	unset PARENT GRANDPARENT
+	unset PARENT
+	unset GRANDPARENT
 }
 
 if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
@@ -55,7 +56,7 @@ find_cargo_root
 if [ -n "$CARGO_ROOT" ]; then
 	cd "$CARGO_ROOT"
 fi
-unset $CARGO_ROOT
+unset CARGO_ROOT
 
 if [ ! -d "$SOURCE_DIR" ]; then
 	echo "Source directory: $SOURCE_DIR doesn't exist"
