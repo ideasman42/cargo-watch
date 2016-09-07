@@ -10,6 +10,9 @@ else
 	echo "No arguments supplied, running build & test."
 fi
 
+# Source relative to $CARGO_ROOT
+SOURCE_DIR="src"
+
 # Allow running from a subdirectory
 function find_cargo_root() {
 	PARENT=""
@@ -26,19 +29,41 @@ function find_cargo_root() {
 	unset PARENT GRANDPARENT
 }
 
+if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+	function watch_fs() {
+		inotifywait \
+			--quiet \
+			--recursive "$SOURCE_DIR" \
+			--exclude '/\..+' \
+			--event modify \
+			--event create \
+			--event delete \
+			--event move \
+			--event close_write \
+			|| true
+	}
+elif [ "$(uname)" == "Darwin" ]; then
+	# Could use fswatch here?
+	echo "TODO: macOS support"
+	exit 1
+else
+	echo "TODO: unsupported platform"
+	exit 1
+fi
+
 find_cargo_root
 if [ -n "$CARGO_ROOT" ]; then
 	cd "$CARGO_ROOT"
 fi
 unset $CARGO_ROOT
 
-if [ ! -d "src" ]; then
-	echo "Source directory: ./src doesn't exist"
+if [ ! -d "$SOURCE_DIR" ]; then
+	echo "Source directory: $SOURCE_DIR doesn't exist"
 	exit 1
 fi
 
 
-echo "Watching \"$PWD/src\", Hit Ctrl-C to stop."
+echo "Watching \"$PWD/$SOURCE_DIR\", Hit Ctrl-C to stop."
 
 # Generally useful
 export RUST_BACKTRACE=1
@@ -46,7 +71,7 @@ export RUST_BACKTRACE=1
 # Allow multi-line input
 
 # Monitor source, ignoring hidden files (autosave, vim swap etc)
-while inotifywait --quiet --recursive src/ --exclude '/\..+' || true; do
+while watch_fs; do
 	# Reset terminal output.
 	tput reset
 
