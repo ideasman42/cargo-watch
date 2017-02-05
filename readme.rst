@@ -30,6 +30,12 @@ Details
 - Errors raise an alert in the terminal on failure.
 
 
+Environment Variables
+---------------------
+
+- ``CARGO_BIN`` Optional override for the default the ``cargo`` command.
+
+
 Examples
 ========
 
@@ -56,7 +62,6 @@ Run multiple commands, using quoted newlines:
    test
    run
    "
-
 
 
 Dependencies

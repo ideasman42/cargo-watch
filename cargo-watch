@@ -10,8 +10,13 @@ else
 	echo "No arguments supplied, running build & test."
 fi
 
+if [[ -z $CARGO_BIN ]]; then
+	CARGO_BIN=cargo
+fi
+
 # Source relative to $CARGO_ROOT
-SOURCE_DIR="src"
+# can be 'src' but we may have crates outside of the 'src' dir.
+SOURCE_DIR="."
 
 # Allow running from a subdirectory
 function find_cargo_root() {
@@ -34,13 +39,12 @@ if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 	function watch_fs() {
 		inotifywait \
 			--quiet \
-			--recursive "$SOURCE_DIR" \
-			--exclude '/\..+' \
 			--event modify \
 			--event create \
 			--event delete \
 			--event move \
 			--event close_write \
+			$(find "$SOURCE_DIR" -name "*.rs" -o -name "*.toml" ! -name ".*") \
 			|| true
 	}
 elif [ "$(uname)" == "Darwin" ]; then
@@ -52,7 +56,7 @@ else
 	exit 1
 fi
 
-find_cargo_root
+# find_cargo_root
 if [ -n "$CARGO_ROOT" ]; then
 	cd "$CARGO_ROOT"
 fi
@@ -67,7 +71,7 @@ fi
 echo "Watching \"$PWD/$SOURCE_DIR\", Hit Ctrl-C to stop."
 
 # Generally useful
-export RUST_BACKTRACE=1
+# export RUST_BACKTRACE=1
 
 # Allow multi-line input
 
@@ -76,18 +80,18 @@ while watch_fs; do
 	# Reset terminal output.
 	tput reset
 
-	# Run cargo test and show any stdout
+	# Run cargo and show any 'stdout'.
 
 	IFS=$'\n'
 	for ARG in $CARGO_ARGS ; do
 		# Avoid blank lines
 		if [ ! -z $ARG ]; then
-			MSG="Running from \"$PWD\": cargo $ARG"
+			MSG="Running from \"$PWD\": $CARGO_BIN $ARG"
 			LEN=${#MSG}
 			eval "printf "%0.s-" {1..$LEN}"
 			echo ""
 			echo $MSG
-			eval cargo $ARG
+			eval $CARGO_BIN $ARG
 		fi
 	done
 	echo ""
