@@ -44,7 +44,7 @@ if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 			--event delete \
 			--event move \
 			--event close_write \
-			$(find "$SOURCE_DIR" -name "*.rs" -o -name "*.toml" ! -name ".*") \
+			$(find "$SOURCE_DIR" -not -path "*/\.*" -name "*.rs" -o -name "*.toml") \
 			|| true
 	}
 elif [ "$(uname)" == "Darwin" ]; then
